@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="data:,">
+<title>Tryck f&ouml;r att forts&auml;tta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0A0A;
+    --text: #FAFAFA;
+    --muted: #8B8B8B;
+    --orange: #FF7E2E;
+    --orange-deep: #FF5E0A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  .stage {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: env(safe-area-inset-top, 0px) 22px env(safe-area-inset-bottom, 0px);
+    background:
+      radial-gradient(ellipse 70% 38% at 50% 34%, rgba(255, 110, 30, .40), transparent 70%),
+      radial-gradient(ellipse 80% 22% at 50% 100%, rgba(255, 140, 60, .13), transparent 75%),
+      var(--bg);
+  }
+
+  .content {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    text-align: center;
+    padding-top: 22vh;
+  }
+
+  h1 {
+    font-size: clamp(34px, 9.4vw, 44px);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+  }
+  p {
+    margin: 18px auto 0;
+    max-width: 22em;
+    font-size: clamp(17px, 4.6vw, 20px);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 38px;
+    padding: 21px 20px;
+    border: 0;
+    border-radius: 22px;
+    background: linear-gradient(180deg, var(--orange), var(--orange-deep));
+    color: #fff;
+    font: inherit;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12) inset, 0 14px 44px rgba(255, 110, 30, .34);
+    animation: pulse 2.4s ease-in-out infinite;
+    transition: transform .12s ease;
+  }
+  .btn:active { transform: scale(.975); }
+  .btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  .btn .arrow { font-weight: 500; }
+
+  .hint {
+    margin-top: 16px;
+    font-size: 13px;
+    color: #5f5f5f;
+    min-height: 18px;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(255,255,255,.12) inset, 0 14px 44px rgba(255, 110, 30, .30); }
+    50%      { box-shadow: 0 0 0 1px rgba(255,255,255,.12) inset, 0 14px 60px rgba(255, 110, 30, .55); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn { animation: none; }
+  }
+</style>
+</head>
+<body>
+<main class="stage">
+  <div class="content">
+    <h1>Tryck f&ouml;r att forts&auml;tta</h1>
+    <p>Tryck p&aring; knappen nedan f&ouml;r att forts&auml;tta.</p>
+    <button class="btn" id="go" type="button">
+      <span>Forts&auml;tt</span>
+      <span class="arrow" aria-hidden="true">&rarr;</span>
+    </button>
+    <div class="hint" id="hint"></div>
+  </div>
+</main>
+
+<script>
+(function () {
+  // ===== SET THIS ONE VALUE =====
+  // Point this at wherever the SWEDISH SushiPass lander is served (sushipass-se.html).
+  var TARGET_URL = "https://swsushipass.securegate.workers.dev/";
+  // ==============================
+
+  // Carry the query string (ttclid, utm_*, etc.) across the jump so tracking survives.
+  function buildUrl() {
+    try {
+      var u = new URL(TARGET_URL);
+      new URLSearchParams(window.location.search).forEach(function (v, k) {
+        if (!u.searchParams.has(k)) u.searchParams.set(k, v);
+      });
+      return u.toString();
+    } catch (e) {
+      return TARGET_URL;
+    }
+  }
+
+  var ua = navigator.userAgent || "";
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) ||
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  function go() {
+    var url = buildUrl();
+    var u;
+    try { u = new URL(url); } catch (e) { window.location.href = url; return; }
+
+    if (isAndroid) {
+      // Hand the URL to Chrome via an Android intent. If the app switches away, the
+      // page goes hidden and we cancel the in-webview fallback. If the intent silently
+      // fails (some TikTok webview builds), the fallback fires and the lander still
+      // loads in place instead of dead-ending.
+      var fallback = setTimeout(function () { window.location.href = url; }, 1500);
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) clearTimeout(fallback);
+      });
+      var path = u.host + u.pathname + u.search + u.hash;
+      window.location.href =
+        "intent://" + path +
+        "#Intent;scheme=" + u.protocol.replace(":", "") +
+        ";action=android.intent.action.VIEW" +
+        ";S.browser_fallback_url=" + encodeURIComponent(url) + ";end";
+      return;
+    }
+
+    // iOS and the rest: no reliable way to force a webview out to Safari anymore
+    // (x-safari- is dead). Send them straight to the lander — the TapRain redirect
+    // is a server-side 302 that logs the click regardless of browser.
+    var hint = document.getElementById("hint");
+    if (isIOS && hint) {
+      hint.textContent = "För registrering kan du även trycka ⋯ → Öppna i webbläsaren";
+    }
+    window.location.href = url;
+  }
+
+  document.getElementById("go").addEventListener("click", go);
+})();
+</script>
+</body>
+</html>
